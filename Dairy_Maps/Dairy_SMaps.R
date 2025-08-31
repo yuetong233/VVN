@@ -198,7 +198,7 @@ weather_data_hour <- bind_rows(full_data_hour) %>%
 # ============================
 ui <- fluidPage(
   tags$head(
-    tags$title("Interactive Map Index: Virginia Dairy Processing Industry")),
+    tags$title("Virginia Dairy Processing Industry")),
   # Theme & styles (Maroon & Orange)
   tags$style(HTML("
   :root{
@@ -214,42 +214,17 @@ ui <- fluidPage(
     font-size:28px; 
     color:var(--vt-maroon); 
     margin:10px 0 20px 0;
-    position: relative;
   }
   .app-title { font-weight:700; font-size: 28px; margin: 0; color: var(--vt-maroon); }
 
-  /* Dashboard button styling */
-  .dashboard-button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 1000;
-  }
-  .dashboard-btn {
-    background: var(--vt-orange);
-    border: 2px solid var(--vt-orange);
-    color: white;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
+  /* Dashboard button hover styling */
   .dashboard-btn:hover {
-    background: var(--vt-maroon);
-    border-color: var(--vt-maroon);
-    color: white;
+    background: var(--vt-maroon) !important;
+    border-color: var(--vt-maroon) !important;
+    color: white !important;
     text-decoration: none;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(134,31,65,0.3);
-  }
-  .dashboard-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(229,117,31,0.4);
   }
 
   /* Tabset styling */
@@ -265,49 +240,73 @@ ui <- fluidPage(
   .section-title{ font-size:20px; font-weight:600; margin:12px 0 4px 0; color:var(--vt-maroon); }
   .section-desc{ font-size:14px; color:var(--vt-orange); margin:6px 0 14px 0; }
 
+  /* Sidebar styling */
+  .well, .sidebarPanel, .panel.sidebarPanel {
+    background-color: #f0f0f0 !important;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.08);
+  }
+
   /* Sidebar info box */
   .info-box{ background:transparent !important; border:none !important; padding:0 !important; }
 
   /* Leaflet sizing */
   #suitability_map, #thi_plotly{ height: var(--map-h); }
+
+  /* Toggle title styling */
+  .toggle-title { text-align: left; font-weight: 600; color: var(--vt-maroon); margin: 6px 0 8px 0; }
 "))
   ,
   
-  # Header with title and dashboard button
+  # Header with title only
   div(class="app-header",
-      h1("Interactive Map Index: Virginia Dairy Processing Industry", class = "app-title"),
-      div(class = "dashboard-button",
-          tags$a(
-            href = "https://juliabrady.shinyapps.io/dairy_processing_facility_optimization/",
-            target = "_blank",
-            class = "dashboard-btn",
-            tags$i(class = "fa fa-external-link"),
-            "View Dashboard"
-          )
-      )
+      h1("Virginia Dairy Processing Industry", class = "app-title")
   ),
   
   tabsetPanel(
     tabPanel(
       "Sustainability Score Map",
       br(),
-      fluidRow(
-        column(
-          width = 12,
-          leafletOutput("suitability_map", height = "520px")
+      sidebarLayout(
+        sidebarPanel(
+          width = 3,
+          h5("Map Information", style = "color:var(--vt-maroon); font-weight:700; margin-bottom:15px;"),
+          p("This map displays composite sustainability scores for Virginia counties based on dairy productivity metrics.",
+            style = "font-size: 13px; color: #555; margin-bottom: 15px;"),
+          
+          # Data source information
+          hr(style = "margin: 30px 0 15px 0; border-color: #ccc;"),
+          div(class = "toggle-title", "Data Source:"),
+          p("These interactive maps are developed by the DSPG Dairy program.", 
+            style = "font-size: 13px; color: #555; margin-bottom: 10px;"),
+          p("For additional analysis and insights, please visit the original dashboard:",
+            style = "font-size: 13px; color: #555; margin-bottom: 12px;"),
+          tags$a(
+            href = "https://juliabrady.shinyapps.io/dairy_processing_facility_optimization/",
+            target = "_blank",
+            class = "dashboard-btn",
+            style = "background: var(--vt-orange); border: 2px solid var(--vt-orange); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease;",
+            tags$i(class = "fa fa-external-link", style = "font-size: 11px;"),
+            "View Dashboard"
+          )
+        ),
+        mainPanel(
+          width = 9,
+          leafletOutput("suitability_map", height = "520px"),
+          div(class="section-title",h3("Sustainability Score", style = "color:var(--vt-maroon); font-weight:700; text-align:left; margin-top:25px;")),
+          div(
+            class="section-desc",
+            p("This map shows a", strong("composite sustainability score"), "for selected Virginia counties.",
+              "In simple terms, it highlights which counties are better suited for dairy operations based on",
+              strong("milk productivity, number of cows per county,"), "and", strong("accessibility index"), 
+              "based on proximity to highways, drive times, and fuel prices.",
+              style = "text-align:justify; color:#E5751F;"),
+            p("Darker red shades indicate higher scores (more suitable), while lighter/yellow shades represent lower scores (less suitable).",
+              "By clicking on a county, users can drill down to see details of its underlying score.",
+              style = "text-align:justify; color:#E5751F;")
+          )
         )
-      ),
-      div(class="section-title",h3("Sustainability Score", style = "color:var(--vt-maroon); font-weight:700; text-align:left; margin-top:25px;")),
-      div(
-        class="section-desc",
-        p("This map shows a", strong("composite sustainability score"), "for selected Virginia counties.",
-          "In simple terms, it highlights which counties are better suited for dairy operations based on",
-          strong("milk productivity, number of cows per county,"), "and", strong("accessibility index"), 
-          "based on proximity to highways, drive times, and fuel prices.",
-          style = "text-align:justify; color:#E5751F;"),
-        p("Darker red shades indicate higher scores (more suitable), while lighter/yellow shades represent lower scores (less suitable).",
-          "By clicking on a county, users can drill down to see details of its underlying score.",
-          style = "text-align:justify; color:#E5751F;")
       )
     ),
     
@@ -323,7 +322,23 @@ ui <- fluidPage(
                 choices = sort(unique(weather_data_hour$county)),
                 selected = if (nrow(weather_data_hour)>0) sort(unique(weather_data_hour$county))[1] else NULL
               ),
-              helpText("THI above ~68 can stress dairy cows and reduce milk yield. Green shading indicates the optimal range (below 68).")
+              helpText("THI above ~68 can stress dairy cows and reduce milk yield. Green shading indicates the optimal range (below 68)."),
+              
+              # Data source information
+              hr(style = "margin: 30px 0 15px 0; border-color: #ccc;"),
+              div(class = "toggle-title", "Data Source:"),
+              p("These interactive maps are developed by the DSPG Dairy program.", 
+                style = "font-size: 13px; color: #555; margin-bottom: 10px;"),
+              p("For additional analysis and insights, please visit the original dashboard:",
+                style = "font-size: 13px; color: #555; margin-bottom: 12px;"),
+              tags$a(
+                href = "https://juliabrady.shinyapps.io/dairy_processing_facility_optimization/",
+                target = "_blank",
+                class = "dashboard-btn",
+                style = "background: var(--vt-orange); border: 2px solid var(--vt-orange); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease;",
+                tags$i(class = "fa fa-external-link", style = "font-size: 11px;"),
+                "View Dashboard"
+              )
           )
         ),
         mainPanel(

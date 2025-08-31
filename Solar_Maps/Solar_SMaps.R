@@ -1,5 +1,5 @@
 # ===================================================================
-# Interactive Solar Facilities Map - Debugged Version (Roads Commented Out)
+# Interactive Solar Facilities Map - Updated Version
 # ===================================================================
 
 # 1. LOAD LIBRARIES
@@ -14,51 +14,41 @@ library(shinyWidgets)  # for radioGroupButtons
 # 2. GLOBAL CONSTANTS
 TARGET_CRS <- 4326
 
-# Base data path - update this to your actual path
+# Base data path 
 data_path <- "Solar_Data"
 
 # 3. LOAD RAW DATA
-cat("Loading raw data...\n")
 
 # Load parcel data
 tryCatch({
   final_data <- readRDS(file.path(data_path, "final_parcel_data.rds"))
-  cat("✓ Parcel data loaded\n")
 }, error = function(e) {
   final_data <- NULL
-  cat("✗ Failed to load parcel data:", e$message, "\n")
 })
 
 # Load transmission lines - SIMPLIFIED VERSION
 tryCatch({
-  cat("Loading transmission lines...\n")
   transmission_file <- file.path(data_path, "Transmission_Lines/Transmission_Lines.shp")
   
   if(file.exists(transmission_file)) {
     # Read the shapefile
     transmission_lines_raw <- st_read(transmission_file, quiet = TRUE)
-    cat("✓ Transmission lines shapefile loaded:", nrow(transmission_lines_raw), "features\n")
     
     # Transform to WGS84
     transmission_lines_raw <- st_transform(transmission_lines_raw, crs = TARGET_CRS)
-    cat("✓ Transmission lines transformed to CRS 4326\n")
     
   } else {
-    cat("✗ Transmission lines file not found at:", transmission_file, "\n")
     transmission_lines_raw <- NULL
   }
 }, error = function(e) {
-  cat("✗ Error loading transmission lines:", e$message, "\n")
   transmission_lines_raw <- NULL
 })
 
 # Load solar facility data
 tryCatch({
   solar_data_raw <- read_csv(file.path(data_path, "solar_facility.csv"), show_col_types = FALSE)
-  cat("✓ Solar facility data loaded\n")
 }, error = function(e) {
   solar_data_raw <- NULL
-  cat("✗ Failed to load solar data:", e$message, "\n")
 })
 
 # Load VA counties
@@ -67,74 +57,41 @@ tryCatch({
     options(tigris_use_cache = TRUE)
     va_counties_raw <- counties(state = "VA", cb = TRUE)
   })
-  cat("✓ VA counties loaded from tigris\n")
 }, error = function(e) {
   va_counties_raw <- NULL
-  cat("✗ Failed to load VA counties:", e$message, "\n")
 })
 
 # Load county level data
 tryCatch({
   county_level_data_raw <- read_csv(file.path(data_path, "county_level_merged_data.csv"), show_col_types = FALSE)
-  cat("✓ County level data loaded\n")
 }, error = function(e) {
   county_level_data_raw <- NULL
-  cat("✗ Failed to load county level data:", e$message, "\n")
 })
 
 # Load water features
 tryCatch({
   water_features_raw <- read_csv(file.path(data_path, "virginia_water_features.csv"), show_col_types = FALSE)
-  cat("✓ Water features data loaded\n")
 }, error = function(e) {
   water_features_raw <- NULL
-  cat("✗ Failed to load water features:", e$message, "\n")
 })
-
-# COMMENTED OUT - Load VA roads - WITH CORRECT PATH
-# tryCatch({
-#   cat("Loading VA roads...\n")
-#   roads_file <- file.path(data_path, "VA_roads/tl_2019_51_prisecroads.shp")
-#   
-#   if(file.exists(roads_file)) {
-#     VA_roads_raw <- st_read(roads_file, quiet = TRUE)
-#     cat("✓ VA roads shapefile loaded:", nrow(VA_roads_raw), "features\n")
-#     
-#     # Transform to WGS84
-#     VA_roads_raw <- st_transform(VA_roads_raw, crs = TARGET_CRS)
-#     cat("✓ VA roads transformed to CRS 4326\n")
-#   } else {
-#     cat("✗ VA roads file not found at:", roads_file, "\n")
-#     VA_roads_raw <- NULL
-#   }
-# }, error = function(e) {
-#   cat("✗ Error loading VA roads:", e$message, "\n")
-#   VA_roads_raw <- NULL
-# })
 
 # Load VA cities
 tryCatch({
-  cat("Loading VA cities...\n")
   cities_file <- file.path(data_path, "VA_Cities/VA_Cities.shp")
   
   if(file.exists(cities_file)) {
     VA_cities_raw <- st_read(cities_file, quiet = TRUE)
-    cat("✓ VA cities shapefile loaded\n")
     
     # Transform to WGS84
     VA_cities_raw <- st_transform(VA_cities_raw, crs = TARGET_CRS)
-    cat("✓ VA cities transformed to CRS 4326\n")
   } else {
-    cat("✗ VA cities file not found at:", cities_file, "\n")
     VA_cities_raw <- NULL
   }
 }, error = function(e) {
-  cat("✗ Error loading VA cities:", e$message, "\n")
   VA_cities_raw <- NULL
 })
 
 # 4. PROCESS DATA
-cat("\nProcessing data...\n")
 
 # Process solar facility map data
 if(!is.null(solar_data_raw)) {
@@ -148,7 +105,6 @@ if(!is.null(solar_data_raw)) {
       Commission_Year = Year
     ) %>%
     drop_na(Latitude, Longitude)
-  cat("✓ Solar facility map data processed:", nrow(map_data), "facilities\n")
 } else {
   map_data <- data.frame(
     Facility_Name = c("Solar Farm A", "Solar Farm B", "Solar Farm C"),
@@ -158,7 +114,6 @@ if(!is.null(solar_data_raw)) {
     Capacity_MW = c(50, 75, 100),
     Commission_Year = c(2018, 2019, 2020)
   )
-  cat("⚠ Using dummy solar facility data\n")
 }
 
 # Process county shapefile
@@ -168,11 +123,9 @@ if(!is.null(va_counties_raw)) {
     mutate(county_clean = str_to_title(NAME))
   
   va_state_border <- st_union(va_counties)
-  cat("✓ VA counties processed:", nrow(va_counties), "counties\n")
 } else {
   va_counties <- NULL
   va_state_border <- NULL
-  cat("⚠ VA counties not available\n")
 }
 
 # Process county level data
@@ -198,7 +151,6 @@ if(!is.null(county_level_data_raw)) {
       Post = max(Post, na.rm = TRUE),
       .groups = "drop"
     )
-  cat("✓ County level data processed:", nrow(county_year_summary), "observations\n")
 } else {
   county_level_data <- NULL
   county_year_summary <- data.frame(
@@ -215,7 +167,6 @@ if(!is.null(county_level_data_raw)) {
     Treated = 1,
     Post = c(0, 1, 1)
   )
-  cat("⚠ Using dummy county level data\n")
 }
 
 # Process parcel data
@@ -229,17 +180,13 @@ if(!is.null(final_data)) {
     } else {
       st_crs(final_data) <- TARGET_CRS
     }
-    cat("✓ Parcel data processed:", nrow(final_data), "parcels\n")
   }, error = function(e) {
-    cat("✗ Error processing parcel data:", e$message, "\n")
     final_data <- NULL
   })
 }
 
 # Process transmission lines - SIMPLIFIED AND FIXED
 if(!is.null(transmission_lines_raw)) {
-  cat("Processing transmission lines...\n")
-  
   tryCatch({
     # Filter to Virginia if state border is available
     if(!is.null(va_state_border)) {
@@ -254,7 +201,6 @@ if(!is.null(transmission_lines_raw)) {
       
       # If filtering resulted in too few lines, use all lines
       if(nrow(lines_va) < 10) {
-        cat("⚠ Very few lines in VA boundary, using all lines\n")
         lines_va <- transmission_lines_raw
       }
     } else {
@@ -263,46 +209,15 @@ if(!is.null(transmission_lines_raw)) {
     
     # Sample if too many lines for performance
     if(nrow(lines_va) > 1000) {
-      cat("Sampling transmission lines for performance...\n")
       lines_va <- lines_va[sample(nrow(lines_va), 1000), ]
     }
     
-    cat("✓ Transmission lines processed:", nrow(lines_va), "lines\n")
-    cat("  Bbox:", paste(round(st_bbox(lines_va), 2), collapse = ", "), "\n")
-    
   }, error = function(e) {
-    cat("✗ Error processing transmission lines, using raw data:", e$message, "\n")
     lines_va <- transmission_lines_raw
   })
 } else {
   lines_va <- NULL
-  cat("⚠ No transmission lines data available\n")
 }
-
-# COMMENTED OUT - Process roads - SIMPLIFIED AND FIXED
-# if(!is.null(VA_roads_raw)) {
-#   cat("Processing roads...\n")
-#   
-#   tryCatch({
-#     # Simplify for performance
-#     VA_roads <- VA_roads_raw %>%
-#       st_simplify(dTolerance = 0.001, preserveTopology = TRUE)
-#     
-#     # Sample if too many roads
-#     if(nrow(VA_roads) > 5000) {
-#       cat("Sampling roads for performance...\n")
-#       VA_roads <- VA_roads[sample(nrow(VA_roads), 5000), ]
-#     }
-#     
-#     cat("✓ Roads processed:", nrow(VA_roads), "road segments\n")
-#   }, error = function(e) {
-#     cat("✗ Error processing roads:", e$message, "\n")
-#     VA_roads <- VA_roads_raw
-#   })
-# } else {
-#   VA_roads <- NULL
-#   cat("⚠ Roads data not available\n")
-# }
 
 # Process cities
 if(!is.null(VA_cities_raw)) {
@@ -311,14 +226,11 @@ if(!is.null(VA_cities_raw)) {
       mutate(POP_2010 = ifelse(POP_2010 < 0, NA, POP_2010)) %>%
       filter(!is.na(POP_2010)) %>%
       slice_max(order_by = POP_2010, n = 300)
-    cat("✓ Cities processed:", nrow(VA_cities), "cities\n")
   }, error = function(e) {
-    cat("✗ Error processing cities:", e$message, "\n")
     VA_cities <- VA_cities_raw
   })
 } else {
   VA_cities <- NULL
-  cat("⚠ Cities data not available\n")
 }
 
 # Process water features
@@ -327,22 +239,12 @@ if(!is.null(water_features_raw)) {
     water_features <- water_features_raw %>%
       st_as_sf(coords = c("INTPTLON", "INTPTLAT"), crs = TARGET_CRS) %>%
       slice_max(order_by = FULLNAME, n = 500)
-    cat("✓ Water features processed:", nrow(water_features), "features\n")
   }, error = function(e) {
-    cat("✗ Error processing water features:", e$message, "\n")
     water_features <- NULL
   })
 } else {
   water_features <- NULL
-  cat("⚠ Water features not available\n")
 }
-
-cat("\nData processing completed!\n")
-cat("Summary of available layers:\n")
-cat("- Transmission lines:", ifelse(!is.null(lines_va), paste(nrow(lines_va), "features"), "Not available"), "\n")
-# COMMENTED OUT - cat("- Roads:", ifelse(!is.null(VA_roads), paste(nrow(VA_roads), "features"), "Not available"), "\n")
-cat("- Cities:", ifelse(!is.null(VA_cities), paste(nrow(VA_cities), "features"), "Not available"), "\n")
-cat("- Water features:", ifelse(!is.null(water_features), paste(nrow(water_features), "features"), "Not available"), "\n")
 
 # ===================================================================
 # SHINY UI
@@ -365,48 +267,21 @@ ui <- fluidPage(
       font-size:28px; 
       color:var(--vt-maroon); 
       margin: 10px 0 20px 0;
-      position: relative;
     }
     .app-title { font-weight:700; font-size: 28px; margin: 0; color: var(--vt-maroon); }
 
-    /* Dashboard button styling */
-    .dashboard-button {
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 1000;
-    }
-    .dashboard-btn {
-      background: var(--vt-orange);
-      border: 2px solid var(--vt-orange);
-      color: white;
-      padding: 8px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
+    /* Dashboard button hover styling */
     .dashboard-btn:hover {
-      background: var(--vt-maroon);
-      border-color: var(--vt-maroon);
-      color: white;
+      background: var(--vt-maroon) !important;
+      border-color: var(--vt-maroon) !important;
+      color: white !important;
       text-decoration: none;
       transform: translateY(-1px);
       box-shadow: 0 4px 8px rgba(134,31,65,0.3);
     }
-    .dashboard-btn:focus {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(229,117,31,0.4);
-    }
 
-    /* Match sidebar height to map */
+    /* Sidebar styling */
     .controls-wrapper, .well, .col-sm-3 {
-      height: var(--map-h) !important;
-      max-height: var(--map-h) !important;
       overflow-y: auto;
     }
 
@@ -442,18 +317,9 @@ ui <- fluidPage(
   )
   ,
   
-  # Header with title and dashboard button
+  # Header with title only
   div(class="app-header",
-      h1("Interactive Solar Facilities Map", class = "app-title"),
-      div(class = "dashboard-button",
-          tags$a(
-            href = "https://solar-farm-vs-land-values-dspg.shinyapps.io/ShinyApp/",
-            target = "_blank",
-            class = "dashboard-btn",
-            tags$i(class = "fa fa-external-link"),
-            "View Dashboard"
-          )
-      )
+      h1("Interactive Solar Facilities Map", class = "app-title")
   ),
   
   sidebarLayout(
@@ -493,9 +359,24 @@ ui <- fluidPage(
           div(class = "toggle-title", "Toggle Map Layers:"),
           div(class = "toggle-items",
               checkboxInput("show_transmission", "Show Transmission Lines", value = TRUE),
-              # COMMENTED OUT - checkboxInput("show_roads",        "Show Roads",            value = FALSE),
               checkboxInput("show_cities",       "Show Urban Centers",    value = FALSE),
               checkboxInput("show_water",        "Show Water Features",   value = FALSE)
+          ),
+          
+          # Data source information
+          hr(style = "margin: 30px 0 15px 0; border-color: #ccc;"),
+          div(class = "toggle-title", "Data Source:"),
+          p("These interactive maps are developed by the DSPG Solar program.", 
+            style = "font-size: 13px; color: #555; margin-bottom: 10px;"),
+          p("For additional analysis and insights, please visit the original dashboard:",
+            style = "font-size: 13px; color: #555; margin-bottom: 12px;"),
+          tags$a(
+            href = "https://solar-farm-vs-land-values-dspg.shinyapps.io/ShinyApp/",
+            target = "_blank",
+            class = "dashboard-btn",
+            style = "background: var(--vt-orange); border: 2px solid var(--vt-orange); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease;",
+            tags$i(class = "fa fa-external-link", style = "font-size: 11px;"),
+            "View Dashboard"
           )
       )
     ),
@@ -568,8 +449,6 @@ server <- function(input, output, session) {
   
   # Render Interactive Map - INITIAL SETUP
   output$interactive_map <- renderLeaflet({
-    cat("Initializing base map...\n")
-    
     # Base map setup
     map <- leaflet() %>%
       addProviderTiles(providers$CartoDB.Positron, group = "Street Map") %>%
@@ -592,7 +471,6 @@ server <- function(input, output, session) {
           opacity = 1,
           group = "State Border"
         )
-      cat("✓ Added state border\n")
     }
     
     # Add solar facilities
@@ -614,10 +492,8 @@ server <- function(input, output, session) {
             "<b>Year:</b>", Commission_Year
           )
         )
-      cat("✓ Added", nrow(map_data), "solar facilities\n")
     }
     
-    cat("✓ Base map initialized\n")
     return(map)
   })
   
@@ -641,26 +517,9 @@ server <- function(input, output, session) {
             ifelse("OWNER" %in% names(lines_va), paste("<br>Owner:", OWNER), "")
           )
         )
-      cat("✓ Added transmission lines to map\n")
     } else {
       proxy %>% clearGroup("Transmission Lines")
     }
-    
-    # COMMENTED OUT - Roads
-    # if(input$show_roads && !is.null(VA_roads) && nrow(VA_roads) > 0) {
-    #   proxy %>%
-    #     clearGroup("Roads") %>%
-    #     addPolylines(
-    #       data = VA_roads,
-    #       color = "gray",
-    #       weight = 1,
-    #       opacity = 0.5,
-    #       group = "Roads"
-    #     )
-    #   cat("✓ Added roads to map\n")
-    # } else {
-    #   proxy %>% clearGroup("Roads")
-    # }
     
     # Cities
     if(input$show_cities && !is.null(VA_cities) && nrow(VA_cities) > 0) {
@@ -677,7 +536,6 @@ server <- function(input, output, session) {
           group = "Urban Centers",
           popup = ~paste0("<b>City:</b> ", NAME)
         )
-      cat("✓ Added cities to map\n")
     } else {
       proxy %>% clearGroup("Urban Centers")
     }
@@ -697,7 +555,6 @@ server <- function(input, output, session) {
           group = "Water Features",
           popup = ~paste0("<b>Waterbody:</b> ", FULLNAME)
         )
-      cat("✓ Added water features to map\n")
     } else {
       proxy %>% clearGroup("Water Features")
     }
@@ -716,7 +573,6 @@ server <- function(input, output, session) {
       # First remove all overlay groups to ensure counties are at the bottom
       proxy %>%
         clearGroup("Transmission Lines") %>%
-        # COMMENTED OUT - clearGroup("Roads") %>%
         clearGroup("Urban Centers") %>%
         clearGroup("Water Features") %>%
         clearGroup("Solar Facilities")
@@ -758,18 +614,6 @@ server <- function(input, output, session) {
             )
           )
       }
-      
-      # COMMENTED OUT - Re-add roads if checkbox is checked
-      # if(input$show_roads && !is.null(VA_roads) && nrow(VA_roads) > 0) {
-      #   proxy %>%
-      #     addPolylines(
-      #       data = VA_roads,
-      #       color = "gray",
-      #       weight = 1,
-      #       opacity = 0.5,
-      #       group = "Roads"
-      #     )
-      # }
       
       # Re-add cities if checkbox is checked
       if(input$show_cities && !is.null(VA_cities) && nrow(VA_cities) > 0) {

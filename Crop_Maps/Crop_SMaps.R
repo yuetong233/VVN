@@ -98,46 +98,32 @@ ui <- fluidPage(
         font-size:28px; 
         color:var(--vt-maroon); 
         margin:10px 0 20px 0;
-        position: relative;
       }
       .app-title { font-weight:700; font-size: 28px; margin: 0; color: var(--vt-maroon); }
 
-      /* Dashboard button styling */
-      .dashboard-button {
-        position: absolute;
-        top: 0;
-        right: 0;
-        z-index: 1000;
-      }
-      .dashboard-btn {
-        background: var(--vt-orange);
-        border: 2px solid var(--vt-orange);
-        color: white;
-        padding: 8px 16px;
-        font-size: 14px;
-        font-weight: 600;
-        text-decoration: none;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
+      /* Dashboard button hover styling */
       .dashboard-btn:hover {
-        background: var(--vt-maroon);
-        border-color: var(--vt-maroon);
-        color: white;
+        background: var(--vt-maroon) !important;
+        border-color: var(--vt-maroon) !important;
+        color: white !important;
         text-decoration: none;
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(134,31,65,0.3);
       }
-      .dashboard-btn:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(229,117,31,0.4);
-      }
 
       h1,h2,h3,h4 { color:var(--vt-maroon); font-weight:700; }
       .section-desc{ color:var(--vt-orange); }
+
+      /* Sidebar styling */
+      .well, .sidebarPanel, .panel.sidebarPanel {
+        background-color: #f0f0f0 !important;
+        border-radius: 10px;
+        padding: 12px;
+        box-shadow: inset 0 0 4px rgba(0,0,0,0.08);
+      }
+
+      /* Toggle title styling */
+      .toggle-title { text-align: left; font-weight: 600; color: var(--vt-maroon); margin: 6px 0 8px 0; }
 
       /* Tabset styling like Cost of Living */
       .nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover{
@@ -147,71 +133,138 @@ ui <- fluidPage(
     "))
   ),
   
-  # Header with title and dashboard button
+  # Header with title only
   div(class="app-header",
-      h1("Virginia Corn Condition & Corn Yield Prediction", class = "app-title"),
-      div(class = "dashboard-button",
-          tags$a(
-            href = "https://shlokeyk.shinyapps.io/DSPG-CROP-DASHBOARD/",
-            target = "_blank",
-            class = "dashboard-btn",
-            tags$i(class = "fa fa-external-link"),
-            "View Dashboard"
-          )
-      )
+      h1("Virginia Corn Condition & Corn Yield Prediction", class = "app-title")
   ),
   
   # TOP TABS (like Cost of Living)
   tabsetPanel(
     tabPanel(
       "Corn Conditions",
-      # Year sub-tabs with plots
-      do.call(tabsetPanel, lapply(names(corn_data_list), function(yr) {
-        tabPanel(yr, br(), plotlyOutput(paste0("plot_", yr), height = "500px"))
-      })),
-      # Descriptions UNDER the graphs
-      br(),
-      h3("Corn Conditions"),
-      p(class="section-desc",
-        "This section presents weekly corn condition data in Virginia from 2021 to 2025 as a stacked area chart, by NASS categories", strong("(Excellent, Good, Fair, Poor, Very Poor)"),
-        ". Each band's thickness represents the proportion of acreage in that condition, and bands sum to 100% at every week.",
-        "The 2025 data reflects current weekly updates and will continue to populate as the growing season progresses.",
-        style = "text-align:justify; color:#E5751F;"
-      ),
-      p(
-        "Switching year tabs lets users compare intra-season dynamics (e.g., stress periods mid-season) across years; hovering reveals exact values.",
-        "Users can download these plots as png.",
-        style = "text-align:justify; color:#E5751F;"
+      sidebarLayout(
+        sidebarPanel(
+          width = 3,
+          h5("Corn Condition Information", style = "color:var(--vt-maroon); font-weight:700; margin-bottom:15px;"),
+          p("Select year tabs to compare corn conditions across different growing seasons. Each chart shows weekly condition percentages as stacked areas.",
+            style = "font-size: 13px; color: #555; margin-bottom: 15px;"),
+          
+          # Legend information
+          h6("Condition Categories:", style = "color:var(--vt-maroon); font-weight:700; margin-bottom:10px;"),
+          tags$div(
+            tags$span("■", style = "color: #1a9850; font-size: 16px;"), " Excellent", tags$br(),
+            tags$span("■", style = "color: #66bd63; font-size: 16px;"), " Good", tags$br(),
+            tags$span("■", style = "color: #fee08b; font-size: 16px;"), " Fair", tags$br(),
+            tags$span("■", style = "color: #d73027; font-size: 16px;"), " Poor", tags$br(),
+            tags$span("■", style = "color: #a50026; font-size: 16px;"), " Very Poor",
+            style = "margin-bottom: 20px; font-size: 13px;"
+          ),
+          
+          # Data source information
+          hr(style = "margin: 30px 0 15px 0; border-color: #ccc;"),
+          div(class = "toggle-title", "Data Source:"),
+          p("These interactive maps are developed by the DSPG Corn program.", 
+            style = "font-size: 13px; color: #555; margin-bottom: 10px;"),
+          p("For additional analysis and insights, please visit the original dashboard:",
+            style = "font-size: 13px; color: #555; margin-bottom: 12px;"),
+          tags$a(
+            href = "https://shlokeyk.shinyapps.io/DSPG-CROP-DASHBOARD/",
+            target = "_blank",
+            class = "dashboard-btn",
+            style = "background: var(--vt-orange); border: 2px solid var(--vt-orange); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease;",
+            tags$i(class = "fa fa-external-link", style = "font-size: 11px;"),
+            "View Dashboard"
+          )
+        ),
+        
+        mainPanel(
+          width = 9,
+          # Year sub-tabs with plots
+          do.call(tabsetPanel, lapply(names(corn_data_list), function(yr) {
+            tabPanel(yr, br(), plotlyOutput(paste0("plot_", yr), height = "500px"))
+          })),
+          # Descriptions UNDER the graphs
+          br(),
+          h3("Corn Conditions"),
+          p(class="section-desc",
+            "This section presents weekly corn condition data in Virginia from 2021 to 2025 as a stacked area chart, by NASS categories", strong("(Excellent, Good, Fair, Poor, Very Poor)"),
+            ". Each band's thickness represents the proportion of acreage in that condition, and bands sum to 100% at every week.",
+            "The 2025 data reflects current weekly updates and will continue to populate as the growing season progresses.",
+            style = "text-align:justify; color:#E5751F;"
+          ),
+          p(
+            "Switching year tabs lets users compare intra-season dynamics (e.g., stress periods mid-season) across years; hovering reveals exact values.",
+            "Users can download these plots as png.",
+            style = "text-align:justify; color:#E5751F;"
+          )
+        )
       )
     ),
     
     tabPanel(
-      "Yield Forecast", br(),
-      plotlyOutput("yield_comparison", height = "500px"),
-      # Descriptions UNDER the graph
-      br(),
-      h3("Yield Forecast"),
-      p(class="section-desc",
-        "This section provides comprehensive yield forecasting for Virginia corn using multiple analytical approaches.",
-        "The dashboard combines historical trend analysis, satellite-derived vegetation indices (EVI), and crop condition data to predict yield outcomes.",
-        style = "text-align:justify; color:#E5751F;"
-      ),
-      p("Virginia state-level corn yield (bushels/acre) is shown from", strong("1984–2025"), "with:",
-        style = "text-align:justify; color:#E5751F;"),
-      tags$ul(
-        tags$li(strong("Actual Yield"), "(black solid): historical outcomes from NASS."),
-        tags$li(strong("Trend Yield"), "(blue dashed): long-run linear trend capturing gradual productivity gains."),
-        tags$li(strong("Forecast (EVI)"), "(green dotted): model using satellite-derived vegetation indices (Enhanced Vegetation Index) to nowcast/forecast yield deviations from trend."),
-        tags$li(strong("Forecast (G+E) "), "(orange dashed): model using the weekly share of crop rated", strong("Good and Excellent"), "to predict yield."),
-        style = "text-align:justify; color:#E5751F;"
-      ),
-      p(
-        "All data is sourced from the USDA National Agricultural Statistics Service (NASS) API for corn conditions and yield data, and Google Earth Engine for vegetation indices. The forecasting models update as new data becomes available.",
-        style = "text-align:justify; color:#E5751F;"
-      ),
-      p("Users can hover over points to view exact values.",
-        "The chart allows comparison of model performance across years (including drought or stress periods) and helps place current-season expectations in the context of historical trends.",
-        style = "text-align:justify; color:#E5751F;")
+      "Yield Forecast",
+      sidebarLayout(
+        sidebarPanel(
+          width = 3,
+          h5("Yield Forecast Models", style = "color:var(--vt-maroon); font-weight:700; margin-bottom:15px;"),
+          p("This forecast combines multiple analytical approaches to predict Virginia corn yields.",
+            style = "font-size: 13px; color: #555; margin-bottom: 15px;"),
+          
+          tags$div(
+            tags$strong("Trend Yield"), " (blue dashed): Long-term linear trend", tags$br(),
+            tags$strong("EVI Forecast"), " (green dotted): Satellite vegetation indices", tags$br(),
+            tags$strong("G+E Forecast"), " (orange dash-dot): Good + Excellent ratings", tags$br(),
+            tags$strong("Actual Yield"), " (black solid): Historical outcomes",
+            style = "margin-bottom: 20px; font-size: 13px;"
+          ),
+          
+          # Data source information
+          hr(style = "margin: 30px 0 15px 0; border-color: #ccc;"),
+          div(class = "toggle-title", "Data Source:"),
+          p("These interactive maps are developed by the DSPG Corn program.", 
+            style = "font-size: 13px; color: #555; margin-bottom: 10px;"),
+          p("For additional analysis and insights, please visit the original dashboard:",
+            style = "font-size: 13px; color: #555; margin-bottom: 12px;"),
+          tags$a(
+            href = "https://shlokeyk.shinyapps.io/DSPG-CROP-DASHBOARD/",
+            target = "_blank",
+            class = "dashboard-btn",
+            style = "background: var(--vt-orange); border: 2px solid var(--vt-orange); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease;",
+            tags$i(class = "fa fa-external-link", style = "font-size: 11px;"),
+            "View Dashboard"
+          )
+        ),
+        
+        mainPanel(
+          width = 9,
+          br(),
+          plotlyOutput("yield_comparison", height = "500px"),
+          # Descriptions UNDER the graph
+          br(),
+          h3("Yield Forecast"),
+          p(class="section-desc",
+            "This section provides comprehensive yield forecasting for Virginia corn using multiple analytical approaches.",
+            "The dashboard combines historical trend analysis, satellite-derived vegetation indices (EVI), and crop condition data to predict yield outcomes.",
+            style = "text-align:justify; color:#E5751F;"
+          ),
+          p("Virginia state-level corn yield (bushels/acre) is shown from", strong("1984–2025"), "with:",
+            style = "text-align:justify; color:#E5751F;"),
+          tags$ul(
+            tags$li(strong("Actual Yield"), "(black solid): historical outcomes from NASS."),
+            tags$li(strong("Trend Yield"), "(blue dashed): long-run linear trend capturing gradual productivity gains."),
+            tags$li(strong("Forecast (EVI)"), "(green dotted): model using satellite-derived vegetation indices (Enhanced Vegetation Index) to nowcast/forecast yield deviations from trend."),
+            tags$li(strong("Forecast (G+E) "), "(orange dashed): model using the weekly share of crop rated", strong("Good and Excellent"), "to predict yield."),
+            style = "text-align:justify; color:#E5751F;"
+          ),
+          p(
+            "All data is sourced from the USDA National Agricultural Statistics Service (NASS) API for corn conditions and yield data, and Google Earth Engine for vegetation indices. The forecasting models update as new data becomes available.",
+            style = "text-align:justify; color:#E5751F;"
+          ),
+          p("Users can hover over points to view exact values.",
+            "The chart allows comparison of model performance across years (including drought or stress periods) and helps place current-season expectations in the context of historical trends.",
+            style = "text-align:justify; color:#E5751F;")
+        )
+      )
     )
   )
 )
@@ -432,15 +485,7 @@ server <- function(input, output, session) {
           legend = list(x = 0.01, y = 0.99),
           hovermode = "x unified",
           annotations = list(
-            list(x = 0.02, y = 0.98, xref = 'paper', yref = 'paper'#,
-                 # text = paste("<b>Legend:</b><br>",
-                 #              "• Black: Historical actual yields<br>",
-                 #              "• Blue dashed: Linear trend (1984-2025)<br>",
-                 #              "• Green dotted: EVI-based forecast<br>",
-                 #              "• Orange dash-dot: Good+Excellent forecast"),
-                 # showarrow = FALSE, align = 'left',
-                 # bgcolor = 'rgba(255,255,255,0.8)', bordercolor = 'black', borderwidth = 1
-            )
+            list(x = 0.02, y = 0.98, xref = 'paper', yref = 'paper')
           )
         )
       

@@ -69,42 +69,17 @@ ui <- fluidPage(
     font-size:28px; 
     color:var(--vt-maroon); 
     margin:10px 0 20px 0;
-    position: relative;
   }
   .app-title { font-weight:700; font-size: 28px; margin: 0; color: var(--vt-maroon); }
 
-  /* Dashboard button styling */
-  .dashboard-button {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 1000;
-  }
-  .dashboard-btn {
-    background: var(--vt-orange);
-    border: 2px solid var(--vt-orange);
-    color: white;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
+  /* Dashboard button hover styling */
   .dashboard-btn:hover {
-    background: var(--vt-maroon);
-    border-color: var(--vt-maroon);
-    color: white;
+    background: var(--vt-maroon) !important;
+    border-color: var(--vt-maroon) !important;
+    color: white !important;
     text-decoration: none;
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(134,31,65,0.3);
-  }
-  .dashboard-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(229,117,31,0.4);
   }
 
   /* Tabset styling */
@@ -146,22 +121,16 @@ ui <- fluidPage(
     color: #fff !important;
   }
 
+  /* Toggle title styling */
+  .toggle-title { text-align: left; font-weight: 600; color: var(--vt-maroon); margin: 6px 0 8px 0; }
+
 "))
     
   ),
   
-  # Header with title and dashboard button
+  # Header with title only
   div(class="app-header",
-      h1("Virginia Childcare Cost & Female Labor Force Interactive Maps", class = "app-title"),
-      div(class = "dashboard-button",
-          tags$a(
-            href = "https://yuetong233.shinyapps.io/childcare_costs_virginia/",
-            target = "_blank",
-            class = "dashboard-btn",
-            tags$i(class = "fa fa-external-link"),
-            "View Dashboard"
-          )
-      )
+      h1("Virginia Childcare Cost & Female Labor Force Interactive Maps", class = "app-title")
   ),
   
   tabsetPanel(
@@ -210,6 +179,22 @@ ui <- fluidPage(
                  conditionalPanel(
                    condition = "input.childcare_view_mode == 'trend'",
                    actionButton("clear_childcare_county", "Clear County Selection", class = "btn btn-warning")
+                 ),
+                 
+                 # Data source information
+                 hr(style = "margin: 30px 0 15px 0; border-color: #ccc;"),
+                 div(class = "toggle-title", "Data Source:"),
+                 p("These interactive maps are developed by the DSPG Childcare program.", 
+                   style = "font-size: 13px; color: #555; margin-bottom: 10px;"),
+                 p("For additional analysis and insights, please visit the original dashboard:",
+                   style = "font-size: 13px; color: #555; margin-bottom: 12px;"),
+                 tags$a(
+                   href = "https://yuetong233.shinyapps.io/childcare_costs_virginia/",
+                   target = "_blank",
+                   class = "dashboard-btn",
+                   style = "background: var(--vt-orange); border: 2px solid var(--vt-orange); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease;",
+                   tags$i(class = "fa fa-external-link", style = "font-size: 11px;"),
+                   "View Dashboard"
                  )
                ),
                
@@ -228,7 +213,7 @@ ui <- fluidPage(
                    style = "text-align:justify; color:#E5751F;"),
                  br(),
                  conditionalPanel(
-                   condition = "input.childcare_view_mode == 'trend'",
+                   condition = "input.childcare_view_mode == 'trend' && output.show_childcare_trend",
                    h4("Childcare Cost Trend for Selected Counties",
                       style = "text-align:center; font-weight:bold;"),
                    plotlyOutput("childcare_trend_plot", height = "400px"),
@@ -241,6 +226,16 @@ ui <- fluidPage(
                      p("The chart highlights both the overall upward trend in childcare costs and regional disparities, ",
                        "with urban areas (e.g., Alexandria City) generally experiencing significantly higher prices than rural areas (e.g., Amelia or Appomattox County).",
                        style = "text-align:justify; color:#E5751F;")
+                   )
+                 ),
+                 
+                 conditionalPanel(
+                   condition = "input.childcare_view_mode == 'trend' && !output.show_childcare_trend",
+                   div(
+                     style = "text-align: center; margin-top: 50px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;",
+                     h4("No Counties Selected", style = "color: var(--vt-maroon); margin-bottom: 15px;"),
+                     p("Please select counties from the dropdown menu or click on the map to view childcare cost trends.",
+                       style = "color: #6c757d; font-size: 14px;")
                    )
                  )
                )
@@ -274,6 +269,22 @@ ui <- fluidPage(
                  conditionalPanel(
                    condition = "input.flfpr_view_mode == 'trend'",
                    actionButton("clear_flfpr_county", "Clear County Selection", class = "btn btn-warning")
+                 ),
+                 
+                 # Data source information
+                 hr(style = "margin: 30px 0 15px 0; border-color: #ccc;"),
+                 div(class = "toggle-title", "Data Source:"),
+                 p("These interactive maps are developed by the DSPG Childcare program.", 
+                   style = "font-size: 13px; color: #555; margin-bottom: 10px;"),
+                 p("For additional analysis and insights, please visit the original dashboard:",
+                   style = "font-size: 13px; color: #555; margin-bottom: 12px;"),
+                 tags$a(
+                   href = "https://yuetong233.shinyapps.io/childcare_costs_virginia/",
+                   target = "_blank",
+                   class = "dashboard-btn",
+                   style = "background: var(--vt-orange); border: 2px solid var(--vt-orange); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease;",
+                   tags$i(class = "fa fa-external-link", style = "font-size: 11px;"),
+                   "View Dashboard"
                  )
                ),
                
@@ -293,7 +304,7 @@ ui <- fluidPage(
                    style = "text-align:justify; color:#E5751F;"),
                  br(),
                  conditionalPanel(
-                   condition = "input.flfpr_view_mode == 'trend'",
+                   condition = "input.flfpr_view_mode == 'trend' && output.show_flfpr_trend",
                    h4("FLFPR Trend for Selected Counties",
                       style = "text-align:center; font-weight:bold;"),
                    plotlyOutput("flfpr_trend_plot", height = "400px"),
@@ -305,6 +316,16 @@ ui <- fluidPage(
                      p("Use the controls on the left to select different counties or adjust the view mode. ",
                        "Trends are based on ACS data and are expressed as percentages of the working-age population.",
                        style = "text-align:justify; color:#E5751F;")
+                   )
+                 ),
+                 
+                 conditionalPanel(
+                   condition = "input.flfpr_view_mode == 'trend' && !output.show_flfpr_trend",
+                   div(
+                     style = "text-align: center; margin-top: 50px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;",
+                     h4("No Counties Selected", style = "color: var(--vt-maroon); margin-bottom: 15px;"),
+                     p("Please select counties from the dropdown menu or click on the map to view FLFPR trends.",
+                       style = "color: #6c757d; font-size: 14px;")
                    )
                  )
                )
@@ -318,6 +339,17 @@ server <- function(input, output, session) {
   # Reactive values for selected counties in each tab
   selected_childcare_counties <- reactiveVal(character(0))
   selected_flfpr_counties <- reactiveVal(character(0))
+  
+  # Reactive value to control trend plot visibility
+  output$show_childcare_trend <- reactive({
+    length(selected_childcare_counties()) > 0
+  })
+  outputOptions(output, "show_childcare_trend", suspendWhenHidden = FALSE)
+  
+  output$show_flfpr_trend <- reactive({
+    length(selected_flfpr_counties()) > 0
+  })
+  outputOptions(output, "show_flfpr_trend", suspendWhenHidden = FALSE)
   
   # Update county choices for both tabs
   observe({

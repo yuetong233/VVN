@@ -577,7 +577,6 @@ create_shiny_ui <- function() {
         .app-header { 
           text-align:center; 
           margin: 10px 0 20px 0; 
-          position: relative;
         }
         .app-title { font-weight:700; font-size: 28px; margin: 0; color: var(--vt-maroon); }
         .section-title { font-size: 22px; font-weight: 600; margin: 10px 0 6px 0; color: var(--vt-maroon); }
@@ -586,38 +585,14 @@ create_shiny_ui <- function() {
         label, .nav-tabs>li>a { color: var(--vt-maroon) !important; }
         a { color: var(--vt-orange); }
         
-        /* Dashboard button styling */
-        .dashboard-button {
-          position: absolute;
-          top: 0;
-          right: 0;
-          z-index: 1000;
-        }
-        .dashboard-btn {
-          background: var(--vt-orange);
-          border: 2px solid var(--vt-orange);
-          color: white;
-          padding: 8px 16px;
-          font-size: 14px;
-          font-weight: 600;
-          text-decoration: none;
-          border-radius: 8px;
-          transition: all 0.3s ease;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-        }
+        /* Dashboard button hover styling */
         .dashboard-btn:hover {
-          background: var(--vt-maroon);
-          border-color: var(--vt-maroon);
-          color: white;
+          background: var(--vt-maroon) !important;
+          border-color: var(--vt-maroon) !important;
+          color: white !important;
           text-decoration: none;
           transform: translateY(-1px);
           box-shadow: 0 4px 8px rgba(134,31,65,0.3);
-        }
-        .dashboard-btn:focus {
-          outline: none;
-          box-shadow: 0 0 0 3px rgba(229,117,31,0.4);
         }
         
         /* Center the controls column to the middle of the map */
@@ -657,21 +632,15 @@ create_shiny_ui <- function() {
         .btn:hover { background: rgba(134,31,65,.06); }
         .btn-primary, .btn-success { background: var(--vt-maroon); border-color: var(--vt-maroon); }
         .btn-primary:hover, .btn-success:hover { background: var(--vt-orange); border-color: var(--vt-orange); }
+        
+        /* Toggle title styling */
+        .toggle-title { text-align: left; font-weight: 600; color: var(--vt-maroon); margin: 6px 0 8px 0; }
       "))
     ),
     
-    # Header with title and dashboard button
+    # Header with title only
     div(class = "app-header",
-        h1("Virginia Cost of Living Interactive Maps", class = "app-title"),
-        div(class = "dashboard-button",
-            tags$a(
-              href = "https://cost.shinyapps.io/col_app/",
-              target = "_blank",
-              class = "dashboard-btn",
-              tags$i(class = "fa fa-external-link"),
-              "View Dashboard"
-            )
-        )
+        h1("Virginia Cost of Living Interactive Maps", class = "app-title")
     ),
     
     tabsetPanel(
@@ -697,6 +666,22 @@ create_shiny_ui <- function() {
                 status    = "primary",
                 checkIcon = list(yes = icon("check")),
                 width     = "100%"
+              ),
+              
+              # Data source information
+              hr(style = "margin: 30px 0 15px 0; border-color: #ccc;"),
+              div(class = "toggle-title", "Data Source:"),
+              p("These interactive maps are developed by the DSPG Cost of Living program.", 
+                style = "font-size: 13px; color: #555; margin-bottom: 10px;"),
+              p("For additional analysis and insights, please visit the original dashboard:",
+                style = "font-size: 13px; color: #555; margin-bottom: 12px;"),
+              tags$a(
+                href = "https://cost.shinyapps.io/col_app/",
+                target = "_blank",
+                class = "dashboard-btn",
+                style = "background: var(--vt-orange); border: 2px solid var(--vt-orange); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease;",
+                tags$i(class = "fa fa-external-link", style = "font-size: 11px;"),
+                "View Dashboard"
               ),
               class = "family-chooser"
             )
@@ -748,6 +733,22 @@ create_shiny_ui <- function() {
                 status    = "primary",
                 checkIcon = list(yes = icon("check")),
                 width     = "100%"
+              ),
+              
+              # Data source information
+              hr(style = "margin: 30px 0 15px 0; border-color: #ccc;"),
+              div(class = "toggle-title", "Data Source:"),
+              p("These interactive maps are developed by the DSPG Cost of Living program.", 
+                style = "font-size: 13px; color: #555; margin-bottom: 10px;"),
+              p("For additional analysis and insights, please visit the original dashboard:",
+                style = "font-size: 13px; color: #555; margin-bottom: 12px;"),
+              tags$a(
+                href = "https://cost.shinyapps.io/col_app/",
+                target = "_blank",
+                class = "dashboard-btn",
+                style = "background: var(--vt-orange); border: 2px solid var(--vt-orange); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s ease;",
+                tags$i(class = "fa fa-external-link", style = "font-size: 11px;"),
+                "View Dashboard"
               ),
               class = "family-chooser"
             )

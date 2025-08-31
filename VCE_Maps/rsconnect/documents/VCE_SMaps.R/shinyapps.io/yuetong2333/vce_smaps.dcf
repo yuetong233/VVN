@@ -1,10 +1,10 @@
-name: dairy_smaps
+name: vce_smaps
 title:
 username: yuetong2333
 account: yuetong2333
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 15217545
-bundleId: 10842645
-url: https://yuetong2333.shinyapps.io/dairy_smaps/
+appId: 15310618
+bundleId: 10840525
+url: https://yuetong2333.shinyapps.io/vce_smaps/
 version: 1
